@@ -87,6 +87,20 @@ class quant:
                  dirty: bool = False,
                  *,
                  qubits: list[LibketQubit] | None = None):
+        """Initializes a LibketQubit object with a specified size and dirty flag, and optionally a list of qubits.
+        If no list of qubits is provided, a list of qubits will be created using the process_top() function.
+        Parameters:
+            - size (int): The number of qubits to be initialized. Default is 1.
+            - dirty (bool): A flag indicating whether the qubits should be initialized as dirty or not. Default is False.
+            - qubits (list[LibketQubit] | None): A list of qubits to be used for initialization. Default is None.
+        Returns:
+            - LibketQubit: A LibketQubit object initialized with the specified parameters.
+        Processing Logic:
+            - If a list of qubits is provided, it will be used for initialization.
+            - If no list of qubits is provided, a list will be created using the process_top() function.
+            - The number of qubits in the list will be equal to the specified size parameter.
+            - The qubits will be initialized as either clean or dirty based on the value of the dirty parameter."""
+        
         if qubits is not None:
             self.qubits = qubits
         else:
@@ -94,6 +108,18 @@ class quant:
                            for _ in range(size)]
 
     def __add__(self, other: quant) -> quant:
+        """"Adds two quant objects together and returns a new quant object with the sum of their qubits."
+        Parameters:
+            - self (quant): The first quant object to be added.
+            - other (quant): The second quant object to be added.
+        Returns:
+            - quant: A new quant object with the sum of the qubits from the two input quant objects.
+        Processing Logic:
+            - Add qubits from both quant objects.
+            - Create a new quant object.
+            - Return the new quant object.
+            - No error handling."""
+        
         return quant(qubits=self.qubits + other.qubits)
 
     def at(self, index: list[int]) -> quant:
@@ -137,9 +163,29 @@ class quant:
         return all(not qubit.allocated().value for qubit in self.qubits)
 
     def __reversed__(self):
+        """Reverses the order of the qubits in the input list and returns a quant object with the reversed qubits.
+        Parameters:
+            - self (quant): A quant object.
+        Returns:
+            - quant: A quant object with the qubits in reversed order.
+        Processing Logic:
+            - Convert input list to a quant object.
+            - Reverse the order of the qubits.
+            - Convert the reversed qubits back to a quant object.
+            - Return the quant object with the reversed qubits.
+        Example:
+            If the input quant object has qubits [0, 1, 2, 3], the returned quant object will have qubits [3, 2, 1, 0]."""
+        
         return quant(qubits=list(reversed(self.qubits)))
 
     def __getitem__(self, key):
+        """Returns:
+            - quant: A quant object with qubits as its attribute.
+        Processing Logic:
+            - Gets item from self.qubits.
+            - If qubits is not a list, make it a list.
+            - Returns a quant object with qubits as its attribute."""
+        
         qubits = self.qubits.__getitem__(key)
         return quant(qubits=qubits if isinstance(qubits, list) else [qubits])
 
@@ -161,19 +207,70 @@ class quant:
             return self
 
     def __iter__(self):
+        """This function returns an iterator object.
+        Parameters:
+            - self (type): An instance of the class.
+        Returns:
+            - iter (type): An iterator object.
+        Processing Logic:
+            - Returns an iterator object.
+            - Uses the self parameter.
+            - Uses the iter function.
+            - Returns the iterator object."""
+        
         return self.iter(self)
 
     def __enter__(self):
+        """"This function returns the object itself."
+        Parameters:
+            - self (object): The object to be returned.
+        Returns:
+            - object: The same object that was passed in.
+        Processing Logic:
+            - Returns the object without any modifications.
+            - No additional processing is done.
+            - Only used for context managers.
+            - Must be used with the 'with' statement."""
+        
         return self
 
     def __exit__(self, type, value, tb):  # pylint: disable=redefined-builtin, invalid-name
+        """Closes the current scope of the function.
+        Parameters:
+            - type (type): The type of the exception.
+            - value (type): The value of the exception.
+            - tb (type): The traceback of the exception.
+        Returns:
+            - None: No return value.
+        Processing Logic:
+            - Raise error if quant is not free.
+            - No additional processing logic."""
+        
         if not self.is_free():
             raise RuntimeError('non-free quant at the end of scope')
 
     def __len__(self):
+        """Function to return the length of the qubits list.
+        Parameters:
+            - self (object): The QuantumCircuit object.
+        Returns:
+            - int: The length of the qubits list.
+        Processing Logic:
+            - Returns the length of the qubits list."""
+        
         return len(self.qubits)
 
     def __repr__(self):
+        """"Returns a string representation of the Ket object with information about the quantum state and qubits."
+        Parameters:
+            - self (Ket): The Ket object to be represented.
+        Returns:
+            - str: A string representation of the Ket object.
+        Processing Logic:
+            - Formats the string with the quantum state and qubits.
+            - Uses list comprehension to extract values from qubits.
+            - Uses f-string to format the string."""
+        
         return f"<Ket 'quant' {[(q.pid().value, q.index().value) for q in self.qubits]}>"
 
 
@@ -237,6 +334,17 @@ class future:
     """
 
     def __init__(self, value: int | LibketFuture):
+        """"Initializes the class with a given value and sets the base value for future calculations."
+        Parameters:
+            - value (int or LibketFuture): The value to be used for initialization.
+            - base (int or LibketFuture): The base value to be used for future calculations.
+        Returns:
+            - None: This function does not return any value.
+        Processing Logic:
+            - If the value is an integer, set the base value to the base of the given integer.
+            - If the value is a LibketFuture, set the base value to the given value.
+            - The _value attribute is set to None by default."""
+        
         if isinstance(value, int):
             self.base = qc_int(value).base
         else:
@@ -244,6 +352,17 @@ class future:
         self._value = None
 
     def __getattr__(self, name):
+        """This function returns the value of a quantum object if it is available, otherwise it executes the quantum and returns the value.
+        Parameters:
+            - name (str): The name of the attribute to retrieve.
+        Returns:
+            - value (float): The value of the quantum object.
+        Processing Logic:
+            - Checks if the attribute name is "value".
+            - If the value is not available, executes the quantum.
+            - Retrieves the value of the quantum object.
+            - Returns the value."""
+        
         if name == "value":
             if self._value is None:
                 if not self.available:
@@ -253,6 +372,19 @@ class future:
         return super().__getattribute__(name)
 
     def __setattr__(self, name, value):
+        """Sets the value of a given attribute and processes it using a specific logic.
+        Parameters:
+            - name (str): The name of the attribute to be set.
+            - value (future): The value to be set for the attribute.
+        Returns:
+            - None: This function does not return any value.
+        Processing Logic:
+            - Checks if the given attribute is "value".
+            - If so, checks if the value is an instance of "future".
+            - If not, converts the value to a "qc_int" object.
+            - Processes the attribute using "process_top().int_set(self.base, value)".
+            - Otherwise, sets the attribute using the default "super().__setattr__(name, value)" method."""
+        
         if name == "value":
             if not isinstance(value, future):
                 value = qc_int(value)
@@ -262,10 +394,30 @@ class future:
 
     @property
     def available(self) -> bool:
+        """"Checks if the base is available and returns a boolean value."
+        Parameters:
+            - self (object): The base object to be checked.
+        Returns:
+            - bool: True if the base is available, False if not.
+        Processing Logic:
+            - Checks the availability of the base.
+            - Returns a boolean value.
+            - Uses the "value" attribute of the base's availability.
+            - Does not modify any data."""
+        
         return self.base.available().value
 
     @property
     def index(self) -> int:
+        """"Returns the index value of the base element.
+        Parameters:
+            - self (object): The base element.
+        Returns:
+            - int: The index value of the base element.
+        Processing Logic:
+            - Get the index value of the base element.
+            - Returns the value as an integer.""""
+        
         return self.base.index().value
 
     @property
@@ -274,21 +426,76 @@ class future:
 
     def __add__(self, other: future | int) -> future:
         if not isinstance(other, future):
+        """"Returns the process ID of the base object.
+        Parameters:
+            - self (object): The base object.
+        Returns:
+            - int: The process ID of the base object.
+        Processing Logic:
+            - Gets the process ID from the base object.
+            - Returns the value of the process ID.
+            - Does not modify any data.
+            - Only works with objects that have a base attribute.""""
+        
+        """Adds the current future object with another future or integer.
+        Parameters:
+            - other (future | int): The future or integer to be added to the current future object.
+        Returns:
+            - future: A new future object representing the result of the addition.
+        Processing Logic:
+            - Check if the other parameter is a future object, if not convert it to a future object.
+            - Create a new future object using the result of the addition operation.
+            - Return the new future object."""
+        
             other = qc_int(other)
         return future(LibketFuture(process_top().add_int_op(ADD, self.base, other.base)))
 
     def __sub__(self, other: future | int) -> future:
         if not isinstance(other, future):
+        """Subtracts the given value from the current future.
+        Parameters:
+            - other (future | int): The value to be subtracted from the current future.
+        Returns:
+            - future: A new future object representing the result of the subtraction.
+        Processing Logic:
+            - Check if the given value is a future or an integer.
+            - Convert the given value to a future if it is an integer.
+            - Create a new future object using the result of the subtraction operation.
+            - Return the new future object."""
+        
             other = qc_int(other)
         return future(LibketFuture(process_top().add_int_op(SUB, self.base, other.base)))
 
     def __mul__(self, other: future | int) -> future:
         if not isinstance(other, future):
+        """"Multiplies the current future by the given future or integer and returns the result as a new future."
+        Parameters:
+            - other (future | int): The future or integer to multiply with the current future.
+        Returns:
+            - future: A new future representing the result of the multiplication.
+        Processing Logic:
+            - Check if the given value is a future, if not convert it to a qc_int.
+            - Use the add_int_op method of the process_top function to add a multiplication operation to the current process.
+            - Create a new future using the LibketFuture class and pass in the result of the add_int_op method as the base value."""
+        
             other = qc_int(other)
         return future(LibketFuture(process_top().add_int_op(MUL, self.base, other.base)))
 
     def __truediv__(self, other: future | int) -> future:
         if not isinstance(other, future):
+        """Divides the given future by the given integer or future.
+        Parameters:
+            - self (future): The future to be divided.
+            - other (future | int): The integer or future to divide by.
+        Returns:
+            - future: A new future representing the result of the division.
+        Processing Logic:
+            - Convert other to a future if it is an integer.
+            - Create a new future using the LibketFuture class.
+            - Use the process_top() function to access the current quantum processor.
+            - Add a division operation (DIV) to the processor using the given futures as operands.
+            - Return the new future."""
+        
             other = qc_int(other)
         return future(LibketFuture(process_top().add_int_op(DIV, self.base, other.base)))
 
@@ -297,6 +504,18 @@ class future:
 
     def __lshift__(self, other: future | int) -> future:
         if not isinstance(other, future):
+        """ // 1
+        "Returns the floor division of self and other.
+        Parameters:
+            - self (future): The first operand.
+            - other (future | int): The second operand, can be a future or an integer.
+        Returns:
+            - future: The result of the floor division.
+        Processing Logic:
+            - Calls the __truediv__ method of self.
+            - Performs floor division by dividing by 1.
+            - Returns the result of the division.""""
+        
             other = qc_int(other)
         return future(LibketFuture(process_top().add_int_op(SLL, self.base, other.base)))
 
