@@ -15,7 +15,6 @@ from __future__ import annotations
 #  limitations under the License.
 
 from math import pi, sqrt
-from random import Random
 from .clib.libket import LibketDump, LibketFuture, LibketLabel, LibketQubit, Process, Features
 from .clib.libket import (EQ, NEQ, GT, GEQ, LT, LEQ, ADD, SUB, MUL, DIV,
                           SLL, SRL, AND, OR, XOR, PAULI_X, PAULI_Y,
@@ -24,6 +23,7 @@ from .clib.libket import (EQ, NEQ, GT, GEQ, LT, LEQ, ADD, SUB, MUL, DIV,
 
 
 from .clib.wrapper import from_list_to_c_vector
+import secrets
 
 __all__ = ['quant', 'future', 'dump']
 
@@ -526,7 +526,7 @@ class dump:
             count, _ = self.base.count()
             return {state: count[i] for i, state in enumerate(self.states)}
 
-        rng = Random(seed)
+        rng = secrets.SystemRandom().Random(seed)
         shots = rng.choices(list(self.states), list(self.probabilities), k=shots)
         result = {}
         for state in shots:

@@ -17,10 +17,10 @@ from __future__ import annotations
 from ctypes import c_uint8, c_void_p, c_size_t, POINTER, c_int32
 from os import environ
 from os.path import dirname
-from random import Random
 import json
 from .libket import JSON
 from .wrapper import load_lib, from_u8_to_str, os_lib_name
+import secrets
 
 DENSE = 0
 SPARSE = 1
@@ -48,7 +48,7 @@ API = load_lib('KBW', kbw_path(), API_argtypes, 'kbw_error_message')
 
 SIM_MODE = None
 
-RNG = Random()
+RNG = secrets.SystemRandom().Random()
 
 
 def set_sim_mode_dense():
@@ -69,7 +69,7 @@ def set_seed(seed):
     """Initialize the simulator RNG"""
 
     global RNG  # pylint: disable=W0603
-    RNG = Random(seed)
+    RNG = secrets.SystemRandom().Random(seed)
 
 
 def set_dump_type(dump_type: str, shots: int | None = None):
