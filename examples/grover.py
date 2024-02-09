@@ -1,6 +1,7 @@
 from ket import *
 from math import sqrt, pi
 from typing import Callable
+import secrets
 
 
 def grover(size: int, oracle: Callable, outcomes: int = 1) -> int:
@@ -28,10 +29,9 @@ def grover(size: int, oracle: Callable, outcomes: int = 1) -> int:
 
 if __name__ == '__main__':
     from ket import kbw
-    from random import randint
 
     size = 12
-    looking_for = randint(0, pow(2, size) - 1)
+    looking_for = secrets.SystemRandom().randint(0, pow(2, size) - 1)
 
     print("Searching for value", looking_for, "using", size, "qubits.")
 

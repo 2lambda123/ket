@@ -1,9 +1,9 @@
 from ket import *
 from math import log2, gcd, pi
-from random import Random
 from time import time
 from functools import reduce
 from ket.plugins import pown
+import secrets
 
 
 def is_prime(n: int) -> bool:
@@ -133,7 +133,7 @@ def shor(N: int, quantum_subroutine=quantum_subroutine, quantum: bool = False, s
         else:
             return factor
 
-    rng = Random(seed)
+    rng = secrets.SystemRandom().Random(seed)
 
     factor = None
 
